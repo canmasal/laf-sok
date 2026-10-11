@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Laf Sok — Cevabı yapay zeka yazsın</title>
+<meta name="description" content="Konuşmayı yapıştır veya ekran görüntüsünü ekle; tonunu seç, yapay zeka sana 3 hazırcevap laf yazsın.">
+<meta name="theme-color" content="#0e0d0b">
+<meta property="og:title" content="Laf Sok 😏">
+<meta property="og:description" content="Konuşmayı yapıştır, cevabı yapay zeka yazsın.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>😏</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Tek sütun, telefon öncelikli: üstte başlık, ortada form kartı, altta cevap balonları (sohbet ekranı hissi) */
+:root{
+  color-scheme:dark;
+  --bg:#0e0d0b;
+  --panel:#17150f;
+  --field:#100f0c;
+  --line:#2c2819;
+  --fg:#f3efe2;
+  --muted:#9d977f;
+  --accent:#ffd23f;
+  --accent-ink:#1c1600;
+  --accent-soft:#3a3010;
+  --bubble-them:#24221b;
+  --bubble-me:#ffd23f;
+  --danger:#ff7b6b;
+  --f-display:"Bricolage Grotesque",ui-rounded,system-ui,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  background-image:radial-gradient(60rem 30rem at 50% -10rem,#2b2410 0%,transparent 70%);background-repeat:no-repeat}
+.wrap{max-width:560px;margin:0 auto;padding:28px 16px 48px;display:flex;flex-direction:column;gap:20px}
+header{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.logo{font-size:56px;line-height:1;filter:drop-shadow(0 6px 18px #ffd23f40)}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(40px,10vw,54px);letter-spacing:-.02em;margin:4px 0 0;color:var(--accent);text-wrap:balance}
+.lede{color:var(--muted);margin:0;max-width:34ch;text-wrap:balance}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--field);border-radius:14px;padding:4px;gap:4px}
+.tab{appearance:none;border:0;background:transparent;color:var(--muted);font:600 15px var(--f-body);padding:11px 8px;border-radius:10px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--bubble-them);color:var(--fg)}
+textarea,input[type=text]{width:100%;background:var(--field);border:1px solid var(--line);color:var(--fg);border-radius:14px;padding:14px;font:16px/1.5 var(--f-body);resize:vertical}
+textarea{min-height:150px}
+textarea:focus,input:focus,.tab:focus-visible,.tone:focus-visible,.btn:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+::placeholder{color:#6f6a57}
+.drop{border:1.5px dashed var(--line);border-radius:14px;padding:22px 14px;text-align:center;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;gap:6px;align-items:center}
+.drop.over{border-color:var(--accent);color:var(--fg)}
+.drop strong{color:var(--fg)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.thumb{position:relative;width:72px;height:96px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb button{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:0;background:#000c;color:#fff;cursor:pointer;font-size:13px;line-height:22px;padding:0}
+.label{font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin:4px 0 -4px}
+.tones{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tone{appearance:none;background:var(--field);border:1px solid var(--line);border-radius:14px;padding:12px 6px;color:var(--fg);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--f-body)}
+.tone b{font-size:16px}
+.tone span{font-size:12px;color:var(--muted)}
+.tone[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.tone[aria-checked="true"] span{color:var(--fg)}
+.swear{display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer;flex-wrap:wrap}
+.swear input{width:20px;height:20px;accent-color:var(--accent)}
+.swear small{color:var(--muted);font-size:13px}
+.swear.off{opacity:.45;cursor:not-allowed}
+.btn{appearance:none;border:0;border-radius:16px;padding:16px;font:800 19px var(--f-display);cursor:pointer;background:linear-gradient(180deg,#ffdc5c,var(--accent));color:var(--accent-ink);box-shadow:0 8px 24px #ffd23f2e}
+.btn:disabled{opacity:.6;cursor:progress}
+.btn.ghost{background:transparent;color:var(--muted);box-shadow:none;border:1px solid var(--line);font:600 14px var(--f-body);padding:10px 14px}
+.row{display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.status{color:var(--muted);font-size:14px;min-height:1.2em}
+.status.err{color:var(--danger)}
+.result{display:flex;flex-direction:column;gap:12px}
+.tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:999px}
+.ctx{align-self:flex-start;max-width:85%;background:var(--bubble-them);border-radius:18px 18px 18px 6px;padding:10px 14px;min-width:0}
+.ctx small{display:block;color:var(--muted);font-size:12px}
+.reply{align-self:flex-end;max-width:90%;display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:0}
+.reply .bub{background:var(--bubble-me);color:var(--accent-ink);border-radius:18px 18px 6px 18px;padding:11px 15px;font-weight:600;overflow-wrap:anywhere}
+.reply .meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.chip{appearance:none;background:transparent;border:1px solid var(--line);color:var(--fg);border-radius:999px;padding:4px 10px;font:600 12px var(--f-body);cursor:pointer}
+.note{font-size:13px;color:var(--muted);text-align:center}
+.typing{align-self:flex-end;background:var(--bubble-them);border-radius:18px;padding:12px 16px;display:flex;gap:5px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:b 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.typing i{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="logo" aria-hidden="true">😏</div>
+    <h1>Laf Sok</h1>
+    <p class="lede">Konuşmayı yapıştır, ekran görüntüsünü ekle ya da olayı anlat. Cevabı yapay zeka yazsın.</p>
+  </header>
+
+  <form class="card" id="form" novalidate>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" id="tab-text" aria-selected="true">✍️ Metin</button>
+      <button type="button" class="tab" role="tab" id="tab-shot" aria-selected="false">📱 Ekran görüntüsü</button>
+    </div>
+
+    <div id="pane-text">
+      <textarea id="convo" placeholder="Konuşmayı olduğu gibi yapıştır; ne kadar uzunsa o kadar iyi. Ya da olayı anlat: 'babama şaka yaptım, şöyle dedi: …'. Ekran görüntüsünü buraya yapıştırabilirsin de."></textarea>
+    </div>
+
+    <div id="pane-shot" hidden>
+      <label class="drop" id="drop" for="file">
+        <strong>Ekran görüntüsü seç</strong>
+        <span>ya da buraya sürükle / yapıştır · en fazla 4 görsel</span>
+        <input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+      </label>
+      <div class="thumbs" id="thumbs"></div>
+      <textarea id="shotNote" style="min-height:70px;margin-top:10px" placeholder="İstersen kısa bir not ekle (kim kim, ne olmuştu…)"></textarea>
+    </div>
+
+    <input type="text" id="myname" placeholder="Konuşmada senin adın (isteğe bağlı)" autocomplete="off">
+
+    <div class="label">Ton</div>
+    <div class="tones" role="radiogroup" aria-label="Ton">
+      <button type="button" class="tone" role="radio" data-tone="hafif" aria-checked="false"><b>Hafif</b><span>tatlı iğne</span></button>
+      <button type="button" class="tone" role="radio" data-tone="orta" aria-checked="true"><b>Orta</b><span>net laf</span></button>
+      <button type="button" class="tone" role="radio" data-tone="acimasiz" aria-checked="false"><b>Acımasız</b><span>konuşmayı bitirir</span></button>
+    </div>
+
+    <label class="swear" id="swearWrap"><input type="checkbox" id="swear"> 🤬 Küfür serbest <small>(yıldızlı: s*ktir; hafif tonda kapalı)</small></label>
+
+    <button class="btn" id="go" type="submit">Laf sok 😏</button>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </form>
+
+  <section class="card result" id="result" aria-live="polite">
+    <span class="tag" id="resTag">Örnek</span>
+    <div class="ctx"><small id="ctxWho">sevgilim</small><span id="ctxText">Bir düşün neden / Mallıklarından olabilir mi</span></div>
+    <div id="replies"></div>
+    <div class="row" id="moreRow" hidden>
+      <span class="note">Beğenmedin mi? Aynı ayarla yenilerini yaz.</span>
+      <button type="button" class="btn ghost" id="again">🔁 Başka cevaplar</button>
+    </div>
+  </section>
+
+  <p class="note">Gönderdiğin konuşmalar kaydedilmez; yalnızca cevap üretmek için işlenir. Cevaplar yapay zeka tarafından yazılır, göndermeden önce oku.</p>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const state = { mode:"text", tone:"orta", images:[], last:null };
+const EXAMPLE = [
+  {text:"Düşündüm, cevap aynaya bakınca çıktı. Sende de var o ayna bence 🙂", vibe:"tatlı iğne"},
+  {text:"Mallık bulaşıcıysa kaynağı belli, ben sadece taşıyıcıyım.", vibe:"net laf"},
+  {text:"Haklısın, bu ilişkide bir kişi fazla düşünüyor, o da ben değilim.", vibe:"ters köşe"}
+];
+
+/* Tabs */
+function setMode(m){
+  state.mode=m;
+  $("#tab-text").setAttribute("aria-selected", m==="text");
+  $("#tab-shot").setAttribute("aria-selected", m==="shot");
+  $("#pane-text").hidden = m!=="text";
+  $("#pane-shot").hidden = m!=="shot";
+}
+$("#tab-text").onclick=()=>setMode("text");
+$("#tab-shot").onclick=()=>setMode("shot");
+
+/* Tone */
+document.querySelectorAll(".tone").forEach(b=>b.onclick=()=>{
+  state.tone=b.dataset.tone;
+  document.querySelectorAll(".tone").forEach(x=>x.setAttribute("aria-checked", x===b));
+  const off = state.tone==="hafif";
+  $("#swear").disabled=off; if(off) $("#swear").checked=false;
+  $("#swearWrap").classList.toggle("off",off);
+});
+
+/* Images */
+const MAX=4;
+function addFiles(list){
+  for(const f of list){
+    if(!f.type.startsWith("image/")) continue;
+    if(state.images.length>=MAX) break;
+    state.images.push(f);
+  }
+  renderThumbs(); if(state.images.length) setMode("shot");
+}
+function renderThumbs(){
+  const t=$("#thumbs"); t.innerHTML="";
+  state.images.forEach((f,i)=>{
+    const d=document.createElement("div"); d.className="thumb";
+    const img=document.createElement("img"); img.src=URL.createObjectURL(f); img.alt="Ekran görüntüsü "+(i+1);
+    const x=document.createElement("button"); x.type="button"; x.textContent="✕"; x.setAttribute("aria-label","Kaldır");
+    x.onclick=()=>{state.images.splice(i,1);renderThumbs();};
+    d.append(img,x); t.append(d);
+  });
+}
+$("#file").onchange=e=>{addFiles(e.target.files); e.target.value="";};
+const drop=$("#drop");
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>addFiles(e.dataTransfer.files));
+document.addEventListener("paste",e=>{
+  const files=[...(e.clipboardData?.files||[])].filter(f=>f.type.startsWith("image/"));
+  if(files.length){e.preventDefault();addFiles(files);}
+});
+
+/* Render replies */
+function renderReplies(list, tagText){
+  $("#resTag").textContent=tagText;
+  const box=$("#replies"); box.innerHTML="";
+  list.forEach(r=>{
+    const w=document.createElement("div"); w.className="reply";
+    const b=document.createElement("div"); b.className="bub"; b.textContent=r.text;
+    const m=document.createElement("div"); m.className="meta";
+    const v=document.createElement("span"); v.textContent=r.vibe||"";
+    const c=document.createElement("button"); c.type="button"; c.className="chip"; c.textContent="Kopyala";
+    c.onclick=async()=>{
+      try{await navigator.clipboard.writeText(r.text); c.textContent="Kopyalandı ✓";}
+      catch{const s=getSelection(),rg=document.createRange();rg.selectNodeContents(b);s.removeAllRanges();s.addRange(rg);c.textContent="Seçildi, kopyala";}
+      setTimeout(()=>c.textContent="Kopyala",1800);
+    };
+    m.append(v,c); w.append(b,m); box.append(w);
+  });
+  box.style.cssText="display:flex;flex-direction:column;gap:12px";
+}
+renderReplies(EXAMPLE,"Örnek");
+
+/* Run */
+const MAXDIM=1600;
+function shrink(file){return new Promise((ok,no)=>{
+  const img=new Image(); img.onload=()=>{
+    let {width:w,height:h}=img; const s=Math.min(1,MAXDIM/Math.max(w,h)); w=Math.round(w*s); h=Math.round(h*s);
+    const c=document.createElement("canvas"); c.width=w; c.height=h; c.getContext("2d").drawImage(img,0,0,w,h);
+    const d=c.toDataURL("image/jpeg",0.82); URL.revokeObjectURL(img.src); ok({type:"image/jpeg",data:d.split(",")[1]});
+  }; img.onerror=()=>no(new Error("img")); img.src=URL.createObjectURL(file);
+});}
+async function run(){
+  const status=$("#status"); status.className="status";
+  const text = state.mode==="text" ? $("#convo").value.trim() : $("#shotNote").value.trim();
+  if(state.mode==="text" && !text){status.textContent="Önce konuşmayı yapıştır ya da olayı anlat."; status.classList.add("err"); return;}
+  if(state.mode==="shot" && !state.images.length){status.textContent="En az bir ekran görüntüsü ekle."; status.classList.add("err"); return;}
+  const go=$("#go"); go.disabled=true; $("#again").disabled=true;
+  status.textContent="Laf hazırlanıyor…";
+  $("#replies").innerHTML='<div class="typing" aria-label="Yazıyor"><i></i><i></i><i></i></div>';
+  $("#resTag").textContent="Yazılıyor";
+  $("#result").scrollIntoView({behavior:"smooth",block:"start"});
+  try{
+    const images = state.mode==="shot" ? await Promise.all(state.images.map(shrink)) : [];
+    const r = await fetch("/api/laf",{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({text,images,name:$("#myname").value.trim(),tone:state.tone,swear:$("#swear").checked})});
+    const data = await r.json().catch(()=>({error:"Sunucu cevap vermedi. Tekrar dene."}));
+    if(!r.ok) throw new Error(data.error||"Bir şey ters gitti. Tekrar dene.");
+    $("#ctxWho").textContent = data.them || "karşı taraf";
+    $("#ctxText").textContent = data.last || "…";
+    state.last=data.replies;
+    renderReplies(data.replies,"Senin için");
+    $("#moreRow").hidden=false;
+    status.textContent="";
+  }catch(e){
+    renderReplies(state.last||EXAMPLE, state.last?"Senin için":"Örnek");
+    status.textContent = e.message==="img" ? "Görsel okunamadı. PNG ya da JPG dene." : (e.message||"Bir şey ters gitti. Tekrar dene.");
+    status.classList.add("err");
+  }finally{ go.disabled=false; $("#again").disabled=false; }
+}
+$("#form").addEventListener("submit",e=>{e.preventDefault();run();});
+$("#again").onclick=()=>run();
+
+/* Taslağı hatırla */
+try{ const d=localStorage.getItem("lafsok-draft"); if(d) $("#convo").value=d; }catch{}
+$("#convo").addEventListener("input",()=>{try{localStorage.setItem("lafsok-draft",$("#convo").value)}catch{}});
+</script>
+
+</body>
+</html>
